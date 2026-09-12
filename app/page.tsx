@@ -2,6 +2,7 @@ import MovieList from '@/components/MovieList';
 import getMoviesByKeyword from '@/lib/tmdb/movies';
 import getGenresList from '@/lib/tmdb/genres';
 import styled from 'styled-components';
+import OfflineAlert from '@/components/OfflineAlert';
 
 type Props = {
   searchParams: Promise<{
@@ -10,14 +11,15 @@ type Props = {
 };
 export default async function Home({ searchParams }: Props) {
   const params = await searchParams;
-
-  const page = Number(params.page) || 1;
+  const pageNumber = Number(params.page);
+  const page = Number.isInteger(pageNumber) && pageNumber > 0 ? pageNumber : 1;
   const [movies, genres] = await Promise.all([
     getMoviesByKeyword('return', page),
     getGenresList(),
   ]);
   return (
     <Wrapper>
+      <OfflineAlert />
       <MovieList data={movies} genres={genres} currentPage={page} />
     </Wrapper>
   );
