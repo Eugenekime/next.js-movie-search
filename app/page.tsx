@@ -7,16 +7,20 @@ import OfflineAlert from '@/components/OfflineAlert';
 type Props = {
   searchParams: Promise<{
     page?: string;
+    search?: string;
   }>;
 };
 export default async function Home({ searchParams }: Props) {
   const params = await searchParams;
   const pageNumber = Number(params.page);
+  const search = params.search || 'return';
   const page = Number.isInteger(pageNumber) && pageNumber > 0 ? pageNumber : 1;
+
   const [movies, genres] = await Promise.all([
-    getMoviesByKeyword('return', page),
+    getMoviesByKeyword(search, page),
     getGenresList(),
   ]);
+
   return (
     <Wrapper>
       <OfflineAlert />

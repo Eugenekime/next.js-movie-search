@@ -1,5 +1,3 @@
-'use client';
-
 import { Flex, Spin } from 'antd';
 
 const Loading: React.FC = () => (
