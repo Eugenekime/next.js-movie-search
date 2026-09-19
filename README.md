@@ -58,3 +58,25 @@ npm run build    # Create production build
 npm start        # Start production server
 npm run lint     # Run ESLint
 ```
+
+## Demo
+
+https://next-js-movie-search-cyan.vercel.app/
+
+## Technologies
+
+- Next.js
+- React
+- TypeScript
+- Ant Design
+- styled-components
+- TMDB API
+
+## Features
+
+- Movie search
+- Pagination
+- Movie genres
+- Movie ratings
+- Rated movies
+- Responsive design
