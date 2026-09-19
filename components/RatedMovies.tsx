@@ -32,7 +32,7 @@ export default function RatedMovies() {
               lg={ratedMovies.length === 1 ? 14 : 12}
               key={item.movie.id}
             >
-              <MovieCard movie={item.movie} rating={item.rating} />
+              <MovieCard movie={item.movie} />
             </Col>
           ))
         )}

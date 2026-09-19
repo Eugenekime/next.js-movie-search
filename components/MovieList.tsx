@@ -7,7 +7,6 @@ import { Row, Col, Pagination, Input } from 'antd';
 import debounce from 'lodash/debounce';
 import { MovieResponse } from '@/lib/tmdb/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useRating } from '@/context/RatingContext';
 
 export default function MovieList({
   data,
@@ -20,11 +19,7 @@ export default function MovieList({
   const searchParams = useSearchParams();
   const search = searchParams.get('search') ?? 'return';
   const [value, setValue] = useState('');
-  const { ratedMovies } = useRating();
 
-  const ratedMap = new Map(
-    ratedMovies?.map((item) => [item.movie.id, item.rating]),
-  );
   const handleSearch = useMemo(
     () =>
       debounce((value: string) => {
@@ -62,7 +57,7 @@ export default function MovieList({
         ) : (
           data.results.map((movie) => (
             <Col xs={24} sm={12} md={12} lg={12} key={movie.id}>
-              <MovieCard movie={movie} rating={ratedMap.get(movie.id)} />
+              <MovieCard movie={movie} />
             </Col>
           ))
         )}

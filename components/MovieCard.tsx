@@ -1,6 +1,5 @@
 import type { Movie } from '@/lib/tmdb/types';
 import { useRating } from '@/context/RatingContext';
-import { useState } from 'react';
 import { Rate, Tag } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
@@ -8,15 +7,9 @@ import { format } from 'date-fns';
 import truncateText from '@/lib/truncateText';
 import { useGenres } from '@/context/GenreContext';
 
-export default function MovieCard({
-  movie,
-  rating,
-}: {
-  movie: Movie;
-  rating?: number;
-}) {
-  const { rateMovie } = useRating();
-  const [userRating, setUserRating] = useState<number>(rating ?? 0);
+export default function MovieCard({ movie }: { movie: Movie }) {
+  const { rateMovie, ratedMovies } = useRating();
+  const ratedMovie = ratedMovies.find((item) => item.movie.id === movie.id);
 
   async function handleRate(value: number) {
     try {
@@ -36,7 +29,6 @@ export default function MovieCard({
         throw new Error(data.error);
       }
 
-      setUserRating(value);
       rateMovie(movie, value);
     } catch (error) {
       console.error(error);
@@ -105,7 +97,7 @@ export default function MovieCard({
             <MobileRateWrapper>
               <Rate
                 count={5}
-                value={userRating ? userRating / 2 : 0}
+                value={ratedMovie?.rating ? ratedMovie.rating / 2 : 0}
                 allowHalf
                 onChange={(value) => handleRate(value * 2)}
               />
@@ -114,7 +106,7 @@ export default function MovieCard({
             <DesktopRateWrapper>
               <Rate
                 count={10}
-                value={userRating ?? 0}
+                value={ratedMovie?.rating ?? 0}
                 allowHalf
                 onChange={handleRate}
               />
