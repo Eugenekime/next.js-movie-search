@@ -1,8 +1,8 @@
-import MovieList from '@/components/MovieList';
-import getMoviesByKeyword from '@/lib/tmdb/movies';
-import getGenresList from '@/lib/tmdb/genres';
 import styled from 'styled-components';
 import OfflineAlert from '@/components/OfflineAlert';
+import TabsBar from '@/components/TabsBar';
+import { Fetcher, getMovieByKeyWordURL } from '@/lib/tmdb/client';
+import { MovieResponse } from '@/lib/tmdb/types';
 
 type Props = {
   searchParams: Promise<{
@@ -12,19 +12,18 @@ type Props = {
 };
 export default async function Home({ searchParams }: Props) {
   const params = await searchParams;
-  const pageNumber = Number(params.page);
   const search = params.search || 'return';
+  const pageNumber = Number(params.page);
   const page = Number.isInteger(pageNumber) && pageNumber > 0 ? pageNumber : 1;
 
-  const [movies, genres] = await Promise.all([
-    getMoviesByKeyword(search, page),
-    getGenresList(),
-  ]);
+  const movies = await Fetcher<MovieResponse>({
+    url: getMovieByKeyWordURL(search, page),
+  });
 
   return (
     <Wrapper>
       <OfflineAlert />
-      <MovieList data={movies} genres={genres} currentPage={page} />
+      <TabsBar data={movies} currentPage={page} />
     </Wrapper>
   );
 }

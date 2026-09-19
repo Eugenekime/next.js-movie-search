@@ -3,26 +3,28 @@
 import { useState, useEffect, useMemo } from 'react';
 import MovieCard from '@/components/MovieCard';
 import styled from 'styled-components';
-import { Row, Col, Pagination } from 'antd';
+import { Row, Col, Pagination, Input } from 'antd';
 import debounce from 'lodash/debounce';
-import { MovieResponse, Genre } from '@/lib/tmdb/types';
+import { MovieResponse } from '@/lib/tmdb/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Input } from 'antd';
+import { useRating } from '@/context/RatingContext';
 
 export default function MovieList({
   data,
-  genres,
   currentPage,
 }: {
   data: MovieResponse;
-  genres: Genre[];
   currentPage: number;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const search = searchParams.get('search') ?? 'return';
-  const [value, setValue] = useState(search);
+  const [value, setValue] = useState('');
+  const { ratedMovies } = useRating();
 
+  const ratedMap = new Map(
+    ratedMovies?.map((item) => [item.movie.id, item.rating]),
+  );
   const handleSearch = useMemo(
     () =>
       debounce((value: string) => {
@@ -60,7 +62,7 @@ export default function MovieList({
         ) : (
           data.results.map((movie) => (
             <Col xs={24} sm={12} md={12} lg={12} key={movie.id}>
-              <MovieCard movie={movie} genres={genres} />
+              <MovieCard movie={movie} rating={ratedMap.get(movie.id)} />
             </Col>
           ))
         )}
@@ -68,7 +70,7 @@ export default function MovieList({
       {data.results.length > 0 && (
         <StyledPagination
           current={currentPage}
-          total={data.total_results}
+          total={Math.min(data.total_pages, 500 * 20)}
           onChange={(page) => {
             const params = new URLSearchParams(searchParams);
 
@@ -122,6 +124,7 @@ const StyledPagination = styled(Pagination)`
 const NoResult = styled.p`
   display: flex;
   justify-content: center;
+  width: 1024px;
   min-width: 200px;
   font-size: 24px;
   font-weight: 600;

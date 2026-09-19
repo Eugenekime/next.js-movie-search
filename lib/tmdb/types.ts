@@ -22,9 +22,33 @@ interface Movie {
   vote_count: number;
 }
 
+type RatedMovie = {
+  movie: Movie;
+  rating: number;
+};
+
 type Genre = {
   id: number;
   name: string;
 };
 
-export type { Movie, MovieResponse, Genre };
+interface GuestSession {
+  success: boolean;
+  guest_session_id: string;
+  expires_at: string;
+}
+
+type RateResponse = {
+  success: boolean;
+  status_code: number;
+  status_message: string;
+};
+
+export type {
+  Movie,
+  MovieResponse,
+  Genre,
+  GuestSession,
+  RateResponse,
+  RatedMovie,
+};

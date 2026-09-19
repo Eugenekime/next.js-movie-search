@@ -1,18 +1,66 @@
-import type { Genre, Movie } from '@/lib/tmdb/types';
+import type { Movie } from '@/lib/tmdb/types';
+import { useRating } from '@/context/RatingContext';
+import { useState } from 'react';
 import { Rate, Tag } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 import { format } from 'date-fns';
 import truncateText from '@/lib/truncateText';
+import { useGenres } from '@/context/GenreContext';
 
 export default function MovieCard({
   movie,
-  genres,
+  rating,
 }: {
   movie: Movie;
-  genres: Genre[];
+  rating?: number;
 }) {
+  const { rateMovie } = useRating();
+  const [userRating, setUserRating] = useState<number>(rating ?? 0);
+
+  async function handleRate(value: number) {
+    try {
+      const res = await fetch(`/api/rating?movie_id=${movie.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          value,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error);
+      }
+
+      setUserRating(value);
+      rateMovie(movie, value);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  const genres = useGenres();
   const genreMap = new Map(genres.map((genre) => [genre.id, genre.name]));
+  function getRatingColor(rating: number) {
+    if (rating <= 3) {
+      return '#E90000';
+    }
+
+    if (rating <= 5) {
+      return '#E97E00';
+    }
+
+    if (rating <= 7) {
+      return '#E9D100';
+    }
+
+    return '#66E900';
+  }
+
+  const ratingColor = getRatingColor(movie.vote_average);
   return (
     <Wrapper>
       <Container>
@@ -32,7 +80,9 @@ export default function MovieCard({
           <ContainerInfo>
             <ContainerInfoTitle>
               <InfoTitle>{movie.original_title}</InfoTitle>
-              <VoteIcon>{Math.round(movie.vote_average * 10) / 10}</VoteIcon>
+              <VoteIcon $color={ratingColor}>
+                {Math.round(movie.vote_average * 10) / 10}
+              </VoteIcon>
             </ContainerInfoTitle>
 
             <InfoDate>
@@ -53,11 +103,21 @@ export default function MovieCard({
           </Overview>
           <ContainerRate>
             <MobileRateWrapper>
-              <Rate count={5} value={movie.vote_average / 2} allowHalf />
+              <Rate
+                count={5}
+                value={userRating ? userRating / 2 : 0}
+                allowHalf
+                onChange={(value) => handleRate(value * 2)}
+              />
             </MobileRateWrapper>
 
             <DesktopRateWrapper>
-              <Rate count={10} value={movie.vote_average} allowHalf />
+              <Rate
+                count={10}
+                value={userRating ?? 0}
+                allowHalf
+                onChange={handleRate}
+              />
             </DesktopRateWrapper>
           </ContainerRate>
         </TopContainer>
@@ -68,7 +128,6 @@ export default function MovieCard({
 
 const Wrapper = styled.div`
   width: 100%;
-  height: 100%;
   background-color: white;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
   @media (min-width: 1024px) {
@@ -78,7 +137,6 @@ const Wrapper = styled.div`
 
 const Container = styled.div`
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -160,14 +218,14 @@ const InfoTitle = styled.p`
   line-height: 28px;
   overflow: hidden;
 `;
-const VoteIcon = styled.p`
+const VoteIcon = styled.p<{ $color: string }>`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 30px;
   height: 30px;
   font-size: 12px;
-  border: 1px solid #e9d100;
+  border: 1px solid ${({ $color }) => $color};
   border-radius: 50%;
   flex-shrink: 0;
 `;
