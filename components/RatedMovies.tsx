@@ -1,50 +1,46 @@
 'use client';
 
-import { useState } from 'react';
 import MovieCard from '@/components/MovieCard';
 import styled from 'styled-components';
 import { useRating } from '@/context/RatingContext';
 import { Row, Col, Pagination } from 'antd';
 
 export default function RatedMovies() {
-  const { ratedMovies } = useRating();
-  const [currentPage, setCurrentPage] = useState(1);
+  const { ratedMovies, page, setPage } = useRating();
+
   const pageSize = 20;
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-
-  const currentMovies = ratedMovies.slice(startIndex, endIndex);
+  if (!ratedMovies) return;
 
   return (
     <Container>
       <Row gutter={[20, 20]}>
-        {ratedMovies.length === 0 ? (
+        {ratedMovies?.results.length === 0 ? (
           <Col xs={24} sm={12} md={12} lg={12} style={{ height: '100vh' }}>
             <NoResult>No result</NoResult>
           </Col>
         ) : (
-          currentMovies.map((item) => (
+          ratedMovies?.results.map((item) => (
             <Col
               xs={24}
               sm={12}
               md={12}
-              lg={ratedMovies.length === 1 ? 14 : 12}
-              key={item.movie.id}
+              lg={ratedMovies?.results.length === 1 ? 14 : 12}
+              key={item.id}
             >
-              <MovieCard movie={item.movie} />
+              <MovieCard movie={item} />
             </Col>
           ))
         )}
       </Row>
 
-      {ratedMovies.length > 1 && (
+      {ratedMovies.total_results > pageSize && (
         <StyledPagination
-          current={currentPage}
-          total={ratedMovies.length}
+          current={page}
+          total={Math.min(ratedMovies.total_results, 500 * 20)}
           pageSize={pageSize}
           onChange={(page) => {
-            setCurrentPage(page);
+            setPage(page);
           }}
           showSizeChanger={false}
         />

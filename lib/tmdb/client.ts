@@ -13,6 +13,15 @@ export const getMovieByKeyWordURL = (name: string, page: number) => {
   return res;
 };
 
+export const getRatedListURL = (guestId: string | undefined, page: number) => {
+  const params = new URLSearchParams();
+  params.set('language', 'en-US');
+  params.set('page', String(page));
+  params.set('sort_by', 'created_at.asc');
+  const res = `/guest_session/${guestId}/rated/movies?${params.toString()}`;
+  return res;
+};
+
 export const rateMovieURL = (movieId: number, guestSessionId: string) => {
   const params = new URLSearchParams();
   params.set('guest_session_id', guestSessionId);

@@ -8,8 +8,8 @@ import truncateText from '@/lib/truncateText';
 import { useGenres } from '@/context/GenreContext';
 
 export default function MovieCard({ movie }: { movie: Movie }) {
-  const { rateMovie, ratedMovies } = useRating();
-  const ratedMovie = ratedMovies.find((item) => item.movie.id === movie.id);
+  const { rateMovie, ratings } = useRating();
+  const ratedMovie = ratings[movie.id];
 
   async function handleRate(value: number) {
     try {
@@ -97,7 +97,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             <MobileRateWrapper>
               <Rate
                 count={5}
-                value={ratedMovie?.rating ? ratedMovie.rating / 2 : 0}
+                value={ratedMovie ? ratedMovie / 2 : 0}
                 allowHalf
                 onChange={(value) => handleRate(value * 2)}
               />
@@ -106,7 +106,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             <DesktopRateWrapper>
               <Rate
                 count={10}
-                value={ratedMovie?.rating ?? 0}
+                value={ratedMovie ?? 0}
                 allowHalf
                 onChange={handleRate}
               />

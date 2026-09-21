@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message });
     }
 
     return NextResponse.json({ error: 'Couldn`t rate movie' }, { status: 500 });

@@ -22,9 +22,15 @@ interface Movie {
   vote_count: number;
 }
 
-type RatedMovie = {
-  movie: Movie;
+type RatedMovie = Movie & {
   rating: number;
+};
+
+type RatedMovieResponse = {
+  page: number;
+  results: RatedMovie[];
+  total_pages: number;
+  total_results: number;
 };
 
 type Genre = {
@@ -50,5 +56,6 @@ export type {
   Genre,
   GuestSession,
   RateResponse,
+  RatedMovieResponse,
   RatedMovie,
 };
