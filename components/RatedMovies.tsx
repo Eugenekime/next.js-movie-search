@@ -4,13 +4,14 @@ import MovieCard from '@/components/MovieCard';
 import styled from 'styled-components';
 import { useRating } from '@/context/RatingContext';
 import { Row, Col, Pagination } from 'antd';
+import Loading from '@/app/loading';
 
 export default function RatedMovies() {
   const { ratedMovies, page, setPage } = useRating();
 
   const pageSize = 20;
 
-  if (!ratedMovies) return;
+  if (!ratedMovies) return <Loading />;
 
   return (
     <Container>
