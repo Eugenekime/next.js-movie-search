@@ -2,31 +2,65 @@
 
 import MovieCard from '@/components/MovieCard';
 import styled from 'styled-components';
-import { useRating } from '@/context/RatingContext';
+import { useState, useEffect } from 'react';
 import { Row, Col, Pagination } from 'antd';
 import Loading from '@/app/loading';
+import { RatedMovieResponse } from '@/lib/tmdb/types';
+import { useRating } from '@/context/RatingContext';
 
 export default function RatedMovies() {
-  const { ratedMovies, page, setPage } = useRating();
+  const { ratingsVersion } = useRating();
+  const [loader, setLoader] = useState(false);
+  const [ratedMovies, setRatedMovies] = useState<RatedMovieResponse | null>(
+    null,
+  );
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    async function getRatedMovies() {
+      try {
+        setLoader(true);
+        const res = await fetch(`/api/rating-list?page=${page}`);
+
+        if (!res.ok) {
+          throw new Error('Couldn`t load rated movies');
+        }
+
+        const data: RatedMovieResponse = await res.json();
+
+        setRatedMovies(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoader(false);
+      }
+    }
+
+    getRatedMovies();
+  }, [page, ratingsVersion]);
 
   const pageSize = 20;
 
-  if (!ratedMovies) return <Loading />;
+  if (loader)
+    return (
+      <Container>
+        <Loading />
+      </Container>
+    );
 
   return (
     <Container>
       <Row gutter={[20, 20]}>
-        {ratedMovies?.results.length === 0 ? (
+        {!ratedMovies || ratedMovies.results.length === 0 ? (
           <Col xs={24} sm={12} md={12} lg={12} style={{ height: '100vh' }}>
-            <NoResult>No result</NoResult>
+            <NoResult>You haven`t rated any movies yet</NoResult>
           </Col>
         ) : (
-          ratedMovies?.results.map((item) => (
+          ratedMovies.results.map((item) => (
             <Col
               xs={24}
               sm={12}
               md={12}
-              lg={ratedMovies?.results.length === 1 ? 14 : 12}
+              lg={ratedMovies.results.length === 1 ? 14 : 12}
               key={item.id}
             >
               <MovieCard movie={item} />
@@ -35,10 +69,10 @@ export default function RatedMovies() {
         )}
       </Row>
 
-      {ratedMovies.total_results > pageSize && (
+      {ratedMovies && ratedMovies.total_results > pageSize && (
         <StyledPagination
           current={page}
-          total={Math.min(ratedMovies.total_results, 500 * 20)}
+          total={Math.min(ratedMovies?.total_results || 0, 500 * 20)}
           pageSize={pageSize}
           onChange={(page) => {
             setPage(page);
@@ -88,11 +122,15 @@ const StyledPagination = styled(Pagination)`
 const NoResult = styled.p`
   display: flex;
   justify-content: center;
-  width: 1024px;
+  text-align: center;
+  width: 320px;
   min-width: 200px;
   font-size: 24px;
   font-weight: 600;
   align-self: center;
   color: grey;
   padding-top: 50px;
+  @media (min-width: 1024px) {
+    width: 1024px;
+  }
 `;

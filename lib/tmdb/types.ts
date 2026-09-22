@@ -22,21 +22,20 @@ interface Movie {
   vote_count: number;
 }
 
-type RatedMovie = Movie & {
-  rating: number;
-};
-
-type RatedMovieResponse = {
-  page: number;
-  results: RatedMovie[];
-  total_pages: number;
-  total_results: number;
-};
-
 type Genre = {
   id: number;
   name: string;
 };
+
+interface RatedMovie extends Movie {
+  rating: number;
+}
+interface RatedMovieResponse {
+  page: number;
+  results: RatedMovie[];
+  total_pages: number;
+  total_results: number;
+}
 
 interface GuestSession {
   success: boolean;
@@ -57,5 +56,4 @@ export type {
   GuestSession,
   RateResponse,
   RatedMovieResponse,
-  RatedMovie,
 };

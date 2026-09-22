@@ -18,7 +18,7 @@ export const getRatedListURL = (guestId: string | undefined, page: number) => {
   params.set('language', 'en-US');
   params.set('page', String(page));
   params.set('sort_by', 'created_at.asc');
-  const res = `/guest_session/${guestId}/rated/movies?${params.toString()}`;
+  const res = `guest_session/${guestId}/rated/movies?${params.toString()}`;
   return res;
 };
 
@@ -38,10 +38,12 @@ export const getGenresURL = () => {
 
 export class FetcherError extends Error {
   status: number;
+  tmdbStatusCode?: number;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, tmdbStatusCode?: number) {
     super(message);
     this.status = status;
+    this.tmdbStatusCode = tmdbStatusCode;
   }
 }
 
@@ -63,23 +65,13 @@ export async function Fetcher<T>({
   });
 
   if (!res.ok) {
-    if (res.status === 401) {
-      throw new FetcherError('Invalid API key', res.status);
-    }
+    const errorData = await res.json().catch(() => null);
 
-    if (res.status === 402) {
-      throw new FetcherError('Payment required', res.status);
-    }
-
-    if (res.status === 404) {
-      throw new FetcherError('Resource not found', res.status);
-    }
-
-    if (res.status === 429) {
-      throw new FetcherError('Too many requests', res.status);
-    }
-
-    throw new FetcherError('Couldn`t load movies', res.status);
+    throw new FetcherError(
+      errorData?.status_message || 'Couldn`t load movies',
+      res.status,
+      errorData?.status_code,
+    );
   }
 
   const data: T = await res.json();

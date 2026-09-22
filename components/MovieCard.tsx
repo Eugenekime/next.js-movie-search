@@ -9,7 +9,6 @@ import { useGenres } from '@/context/GenreContext';
 
 export default function MovieCard({ movie }: { movie: Movie }) {
   const { rateMovie, ratings } = useRating();
-  const ratedMovie = ratings[movie.id];
 
   async function handleRate(value: number) {
     try {
@@ -29,7 +28,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
         throw new Error(data.error);
       }
 
-      rateMovie(movie, value);
+      rateMovie(movie.id, value);
     } catch (error) {
       console.error(error);
     }
@@ -97,7 +96,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             <MobileRateWrapper>
               <Rate
                 count={5}
-                value={ratedMovie ? ratedMovie / 2 : 0}
+                value={ratings[movie.id] ? ratings[movie.id] / 2 : 0}
                 allowHalf
                 onChange={(value) => handleRate(value * 2)}
               />
@@ -106,7 +105,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             <DesktopRateWrapper>
               <Rate
                 count={10}
-                value={ratedMovie ?? 0}
+                value={ratings[movie.id] ?? 0}
                 allowHalf
                 onChange={handleRate}
               />
